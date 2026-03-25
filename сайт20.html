@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>StrategyHub — центр стратегических онлайн-игр</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F1115;
+            color: #FFFFFF;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        :root {
+            --primary-blue: #1A73E8;
+            --accent-orange: #FF6B35;
+            --card-bg: #1A1D23;
+            --text-gray: #D1D5DB;
+            --border-gray: #2C2F36;
+        }
+        h1, h2, h3 { font-weight: 700; }
+        h1 { font-size: 2.8rem; }
+        h2 { font-size: 2.2rem; color: var(--primary-blue); border-left: 4px solid var(--accent-orange); padding-left: 15px; margin-bottom: 1.5rem; }
+        h3 { font-size: 1.5rem; color: var(--primary-blue); margin-bottom: 1rem; }
+        .btn {
+            display: inline-block; padding: 12px 28px; border-radius: 8px; font-weight: 600;
+            cursor: pointer; border: none; transition: 0.2s; background-color: var(--accent-orange); color: #0F1115;
+        }
+        .btn-large { padding: 14px 36px; font-size: 1.1rem; }
+        .btn:hover { background-color: #ff8252; transform: scale(1.02); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary-blue); color: var(--primary-blue); }
+        .btn-outline:hover { background: var(--primary-blue); color: #FFFFFF; }
+
+        header { background-color: #0F1115; border-bottom: 2px solid var(--primary-blue); position: sticky; top: 0; z-index: 100; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; height: 70px; gap: 8px; }
+        .logo-area { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .logo-icon { background: var(--primary-blue); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.3rem; color: white; }
+        .logo-text h2 { font-size: 1.3rem; margin-bottom: 0; color: var(--primary-blue); line-height: 1.2; }
+        .logo-text span { font-size: 0.7rem; color: var(--text-gray); }
+        nav { flex-shrink: 1; }
+        nav ul { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+        nav ul li a { font-weight: 500; color: var(--text-gray); text-decoration: none; font-size: 0.9rem; white-space: nowrap; padding: 5px 8px; }
+        nav ul li a:hover, nav ul li a.active { color: var(--primary-blue); border-bottom: 2px solid var(--accent-orange); padding-bottom: 3px; }
+        .user-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+        .lang-switch { background: #1A1D23; padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; display: flex; gap: 6px; border: 1px solid var(--primary-blue); }
+        .lang-switch span { cursor: pointer; color: var(--text-gray); }
+        .lang-switch span.active { color: var(--primary-blue); font-weight: 700; }
+        .icon-btn { background: none; border: none; color: var(--primary-blue); font-size: 1.1rem; cursor: pointer; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg); padding: 40px; border-radius: 16px;
+            max-width: 500px; width: 90%; border: 2px solid var(--primary-blue);
+        }
+        .modal-content input { width: 100%; padding: 15px; margin-bottom: 15px; background: #0F1115; border: 1px solid var(--primary-blue); border-radius: 8px; color: white; font-size: 1rem; }
+        .modal-content label { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; cursor: pointer; }
+        .modal-content label input { width: auto; margin-bottom: 0; }
+        .close-modal { float: right; font-size: 1.5rem; cursor: pointer; color: var(--accent-orange); }
+        .social-login { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+        .social-login i { font-size: 2rem; cursor: pointer; color: var(--primary-blue); transition: 0.2s; }
+        .social-login i:hover { color: var(--accent-orange); }
+
+        /* КАРТОЧКИ КАТАЛОГА - ОДИНАКОВОГО РАЗМЕРА */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--primary-blue);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .game-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-5px);
+        }
+        .game-image {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .game-rating {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-orange);
+            color: #0F1115;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .game-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-info h4 {
+            font-size: 1.3rem;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+        }
+        .game-meta {
+            display: flex;
+            gap: 15px;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin: 10px 0;
+        }
+        .game-meta i {
+            color: var(--primary-blue);
+            margin-right: 5px;
+        }
+        .game-info p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: var(--text-gray);
+            margin-top: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        .news-item { background: var(--card-bg); padding: 20px; border-radius: 16px; border: 1px solid var(--primary-blue); cursor: pointer; transition: 0.2s; }
+        .news-item:hover { border-color: var(--accent-orange); transform: translateY(-5px); }
+        .news-date { color: var(--primary-blue); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .news-item h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--primary-blue); }
+
+        .guide-list { display: grid; gap: 20px; }
+        .guide-item { background: var(--card-bg); padding: 20px; border-radius: 16px; border: 1px solid var(--primary-blue); }
+        .guide-item h3 { font-size: 1.3rem; color: var(--primary-blue); margin-bottom: 10px; }
+
+        .filter-bar { display: flex; gap: 15px; flex-wrap: wrap; background: #1A1D23; padding: 20px; border-radius: 16px; border: 1px solid var(--primary-blue); margin-bottom: 20px; align-items: center; }
+        .filter-bar select, .filter-bar input { background: #0F1115; color: white; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--primary-blue); font-size: 0.95rem; }
+        .search-container { flex: 2; min-width: 200px; position: relative; }
+        .search-container input { width: 100%; }
+        .autocomplete-items { position: absolute; background: #1A1D23; border: 1px solid var(--primary-blue); width: 100%; z-index: 10; border-radius: 0 0 8px 8px; }
+        .autocomplete-items div { padding: 10px; cursor: pointer; }
+
+        footer { background: #0a0c10; border-top: 2px solid var(--primary-blue); padding: 60px 0 30px; margin-top: 60px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+        .social-links a { color: var(--primary-blue); margin-right: 20px; font-size: 1.8rem; transition: 0.2s; }
+        .social-links a:hover { color: var(--accent-orange); }
+        .page { display: none; padding: 40px 0; }
+        .page.active { display: block; }
+        .hero-section { padding: 60px 0; background: radial-gradient(circle at 70% 30%, #1A73E8 0%, #0F1115 70%); border-radius: 30px; margin-bottom: 40px; text-align: left; }
+        .my-contacts { background: #1A1D23; padding: 30px; border-radius: 24px; border: 1px solid var(--primary-blue); }
+        .my-contacts p { margin: 18px 0; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; }
+        .my-contacts i { width: 30px; color: var(--primary-blue); font-size: 1.3rem; }
+        .banner-small { background: #1A1D23; border-left: 4px solid var(--accent-orange); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid var(--primary-blue); }
+        .banner-small p { margin: 8px 0 15px 0; }
+        .banner { background: linear-gradient(90deg, #FF6B35 0%, #1A73E8 100%); border-radius: 20px; padding: 30px; margin: 40px 0; text-align: center; }
+        .banner h3 { font-size: 2rem; color: white; margin-bottom: 10px; }
+        .banner p { font-size: 1.2rem; }
+        .loyalty-card { background: linear-gradient(135deg, #1A1D23 0%, #0F1115 100%); border: 2px solid #FF6B35; border-radius: 20px; padding: 30px; margin: 30px 0; text-align: center; }
+        .loyalty-card h3 { font-size: 1.8rem; color: #FF6B35; margin-bottom: 20px; }
+        .loyalty-card .loyalty-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; font-size: 1.1rem; margin-bottom: 20px; }
+        .loyalty-card .bonus-info { font-size: 0.95rem; color: var(--text-gray); margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--primary-blue); }
+        .promo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin: 30px 0; }
+        .promo-card { background: var(--card-bg); padding: 20px; border-radius: 16px; border-left: 4px solid var(--accent-orange); border: 1px solid var(--primary-blue); }
+        .promo-card h4 { font-size: 1.2rem; margin-bottom: 8px; color: var(--primary-blue); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; margin: 40px 0; }
+        @media (max-width: 1000px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .stat-item { background: var(--card-bg); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--primary-blue); }
+        .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--accent-orange); }
+        .advantages-grid, .guarantees-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 30px 0; }
+        .advantage-card, .guarantee-card { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--primary-blue); }
+        .advantage-card i, .guarantee-card i { font-size: 2rem; color: var(--accent-orange); margin-bottom: 15px; display: block; }
+        .awards-grid { display: flex; gap: 20px; flex-wrap: wrap; margin: 30px 0; }
+        .award-item { background: var(--card-bg); padding: 12px 24px; border-radius: 50px; border: 1px solid var(--accent-orange); display: inline-flex; align-items: center; gap: 8px; }
+        .facts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .fact-item { background: var(--card-bg); padding: 12px 20px; border-radius: 12px; border-left: 4px solid var(--primary-blue); display: flex; align-items: center; gap: 10px; }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin: 40px 0; }
+        .pricing-card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 2px solid var(--primary-blue); text-align: center; }
+        .pricing-card.premium { border-color: var(--accent-orange); }
+        .price { font-size: 2rem; font-weight: 700; color: var(--accent-orange); margin: 15px 0; }
+        .pricing-card .btn { margin-top: 20px; background-color: var(--accent-orange); color: #0F1115; }
+
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 40px 0; }
+        .step-item { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--primary-blue); text-align: center; cursor: pointer; transition: 0.2s; }
+        .step-item:hover { border-color: var(--accent-orange); transform: translateY(-5px); }
+        .step-item i { font-size: 2rem; color: var(--accent-orange); margin-bottom: 15px; display: block; }
+        .step-item h4 { font-size: 1.2rem; margin-bottom: 8px; color: var(--primary-blue); }
+
+        .dev-form-classic { background: #1A1D23; padding: 30px; border-radius: 20px; border: 1px solid var(--primary-blue); margin-top: 30px; }
+        .dev-form-classic input, .dev-form-classic textarea { width: 100%; padding: 15px; margin-bottom: 15px; background: #0F1115; border: 1px solid var(--primary-blue); border-radius: 8px; color: white; font-size: 1rem; }
+        .review-item { background: #0F1115; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--primary-blue); }
+        .review-actions i { margin-right: 10px; cursor: pointer; color: var(--primary-blue); }
+        .cookie-notice {
+            position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--card-bg);
+            border: 2px solid var(--primary-blue); border-radius: 16px; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+            max-width: 600px; margin: 0 auto; box-shadow: 0 4px 20px rgba(26,115,232,0.3);
+        }
+        .ratings-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--primary-blue); }
+        .ratings-table th, .ratings-table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-gray); }
+        .ratings-table th { background: var(--primary-blue); color: white; font-weight: 600; }
+        .cabinet-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .cabinet-card { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--primary-blue); }
+        .cabinet-card h3 { color: var(--accent-orange); margin-bottom: 15px; }
+        .cabinet-card ul { list-style: none; padding-left: 0; }
+        .cabinet-card li { margin: 10px 0; padding: 8px; background: #0F1115; border-radius: 8px; border-left: 3px solid var(--primary-blue); }
+        .back-button { margin-bottom: 30px; }
+        #ratingType { padding: 12px 20px; font-size: 1rem; }
+        .game-detail-layout {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .game-detail-image {
+            width: 300px;
+            flex-shrink: 0;
+        }
+        .game-detail-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            border: 2px solid var(--accent-orange);
+        }
+        .game-detail-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        .game-detail-screenshots {
+            margin-top: 30px;
+        }
+        .game-detail-screenshots .screenshots-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .game-detail-screenshots img {
+            width: 300px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid var(--accent-orange);
+        }
+        .contact-social-icons { display: flex; gap: 15px; margin-top: 20px; }
+        .contact-social-icons a { color: var(--primary-blue); font-size: 2rem; transition: 0.2s; }
+        .contact-social-icons a:hover { color: var(--accent-orange); }
+        .game-detail-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--primary-blue);
+            width: 100%;
+        }
+
+        /* Стили для обсуждений в сообществе */
+        .discussion-item {
+            background: var(--card-bg);
+            padding: 18px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--primary-blue);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .discussion-item:hover {
+            border-color: var(--accent-orange);
+            transform: translateX(5px);
+        }
+        .discussion-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-gray);
+        }
+        .discussion-title i {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+        .discussion-stats {
+            display: flex;
+            gap: 20px;
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+        .discussion-stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .discussion-stats i {
+            color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+    <div id="cookieNotice" class="cookie-notice"><div><i class="fas fa-cookie-bite" style="color: var(--accent-orange); font-size: 1.5rem;"></i><span style="margin-left:10px;">Мы используем cookie для вашего комфорта</span></div><div class="cookie-buttons"><button class="btn" onclick="acceptCookies()">Принять</button><button class="btn btn-outline" onclick="declineCookies()">Отклонить</button></div></div>
+
+    <header>
+        <div class="container header-content">
+            <div class="logo-area"><div class="logo-icon">S</div><div class="logo-text"><h2>StrategyHub</h2><span>центр стратегий</span></div></div>
+            <nav><ul><li><a href="#" data-page="home">Главная</a></li><li><a href="#" data-page="catalog">Обзор стратегий</a></li><li><a href="#" data-page="news">Новости</a></li><li><a href="#" data-page="guides">Гайды</a></li><li><a href="#" data-page="ratings">Рейтинги</a></li><li><a href="#" data-page="community">Сообщество</a></li><li><a href="#" data-page="partners">Партнёрам</a></li><li><a href="#" data-page="about">О нас</a></li><li><a href="#" data-page="faq">Помощь</a></li><li><a href="#" data-page="contacts">Контакты</a></li></ul></nav>
+            <div class="user-actions"><div class="lang-switch"><span class="active">RU</span><span>BY</span><span>EN</span></div><button class="icon-btn" id="loginBtn"><i class="fas fa-user"></i></button><button class="icon-btn" id="registerBtn"><i class="fas fa-user-plus"></i></button><button class="icon-btn" id="cabinetBtn"><i class="fas fa-id-card"></i></button></div>
+        </div>
+    </header>
+
+    <div id="loginModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeLogin">&times;</span><h3>Вход</h3><input placeholder="Email"><input type="password" placeholder="Пароль"><button class="btn" style="width:100%">Войти</button><div class="social-login"><i class="fab fa-vk"></i><i class="fab fa-google"></i><i class="fab fa-discord"></i></div></div></div>
+    <div id="registerModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeRegister">&times;</span><h3>Регистрация</h3><input placeholder="Имя"><input placeholder="Email"><input type="password" placeholder="Пароль"><label><input type="checkbox"> Согласие на обработку персональных данных</label><button class="btn" style="width:100%">Зарегистрироваться</button><div class="social-login"><i class="fab fa-vk"></i><i class="fab fa-google"></i><i class="fab fa-discord"></i></div></div></div>
+    <div id="newsModal" class="modal"><div class="modal-content" id="newsModalContent"><span class="close-modal" id="closeNewsModal">&times;</span><h3>Новость</h3><p>Текст</p></div></div>
+
+    <main class="container">
+        <section id="home" class="page active">
+            <div class="hero-section"><h1>Твой центр стратегических онлайн‑игр</h1><p style="font-size:1.3rem; color:#D1D5DB;">Аналитика, рейтинги, обзоры и сообщество — всё в одном месте</p><button class="btn btn-large" style="margin-top:25px;" onclick="navigateTo('catalog')">Перейти в каталог</button></div>
+            <div class="banner"><h3>⚔️ Турнир месяца: Битва стратегов ⚔️</h3><p>Призовой фонд 1000 BYN. Регистрация до 20 марта!</p></div>
+            <div class="loyalty-card"><h3>🎁 Программа лояльности</h3><div class="loyalty-grid"><div><i class="fas fa-star"></i> Бонусы за отзывы</div><div><i class="fas fa-star"></i> +50 баллов за голосование</div><div><i class="fas fa-users"></i> Рефералы: 100 баллов за друга</div><div><i class="fas fa-gift"></i> Обмен баллов на скидки</div></div><div class="bonus-info"><i class="fas fa-info-circle"></i> Накопленные баллы можно обменять на: скидку на премиум-аккаунт, участие в эксклюзивных турнирах, доступ к закрытым гайдам и уникальные аватары в профиле.</div></div>
+            <h2>Акции и предложения</h2>
+            <div class="promo-grid"><div class="promo-card"><h4>🎉 100 баллов за регистрацию</h4><p>Бонусные баллы на счёт</p></div><div class="promo-card"><h4>👥 Приведи друга</h4><p>50 баллов + скидка 10% на турниры</p></div><div class="promo-card"><h4>🌱 Весенняя распродажа</h4><p>Премиум-гайды за полцены</p></div><div class="promo-card"><h4>🛒 Скидки в магазинах</h4><p>Партнёрские предложения для игроков</p></div></div>
+            <h2>Популярные игры</h2>
+            <div class="games-grid" id="popular-games"></div>
+            <h2>Последние новости</h2>
+            <div class="news-grid" id="home-news"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:40px 0;">
+                <div class="banner-small"><h3><i class="fas fa-users"></i> Сообщество</h3><p>Обсуждения, турниры, голосования. Присоединяйся!</p><button class="btn" onclick="navigateTo('community')">Перейти</button></div>
+                <div class="banner-small"><h3>Для разработчиков</h3><p>Разместите свою игру на платформе</p><button class="btn" onclick="navigateTo('partners')">Оставить заявку</button></div>
+            </div>
+        </section>
+
+        <section id="catalog" class="page">
+            <h2>Обзор стратегий</h2>
+            <div class="filter-bar">
+                <div class="search-container"><input type="text" id="searchInput" placeholder="Поиск по названию или тегу (RTS, 4X, MMO...)"><div id="autocomplete" class="autocomplete-items"></div></div>
+                <select id="filterGenre"><option value="">Жанр</option><option value="RTS">RTS</option><option value="Пошаговая">Пошаговая</option><option value="4X">4X</option><option value="MMO">MMO</option></select>
+                <select id="filterPlatform"><option value="">Платформа</option><option value="ПК">ПК</option><option value="Мобильные">Мобильные</option></select>
+                <select id="filterOnline"><option value="">Онлайн/офлайн</option><option value="Онлайн">Онлайн</option><option value="Офлайн">Офлайн</option></select>
+                <select id="filterDifficulty"><option value="">Сложность</option><option value="Новичок">Новичок</option><option value="Средняя">Средняя</option><option value="Хардкор">Хардкор</option></select>
+                <select id="filterYear"><option value="">Год</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option></select>
+                <select id="sortOrder"><option value="rating">Рейтинг</option><option value="popular">Популярность</option><option value="new">Новизна</option></select>
+            </div>
+            <div class="games-grid" id="catalog-games"></div>
+        </section>
+
+        <section id="game-page" class="page"><div class="back-button"><button class="btn btn-outline" onclick="navigateTo('catalog')"><i class="fas fa-arrow-left"></i> Назад в каталог</button></div><div id="game-detail-container"></div><div class="banner-small" style="text-align:center; margin-top:20px;">🔥 Дополнение "Новые рубежи" уже в продаже!</div></section>
+        <section id="news" class="page"><h2>Новости</h2><div class="news-grid" id="news-list"></div></section>
+        <section id="guides" class="page"><h2>Гайды и обучающие материалы</h2><div class="guide-list" id="guides-list"></div></section>
+        <section id="ratings" class="page"><h2>Рейтинги стратегий</h2><div style="margin-bottom:20px; max-width:320px;"><select id="ratingType" style="background:#0F1115; color:white; border:1px solid #1A73E8; padding:12px 20px; border-radius:8px; width:100%; font-size:1rem;"><option value="top">Топ стратегий</option><option value="pc">Топ для ПК</option><option value="mobile">Топ для мобильных</option><option value="new">Новые релизы</option><option value="month">Лучшие игры месяца</option></select></div><div id="ratings-table"></div></section>
+
+        <section id="community" class="page">
+            <h2>Сообщество игроков</h2>
+            <div style="background: linear-gradient(135deg, #1A73E8 0%, #0F1115 100%); padding:30px; border-radius:20px; margin-bottom:30px; border:1px solid var(--primary-blue);"><h3 style="color:white;">📝 Помоги нам стать лучше!</h3><p>Пройди опрос за 2 минуты и получи 10 бонусных баллов.</p><a href="https://forms.gle/jvgDW6bmHCyfh8T49" class="btn" id="googleFormLink" target="_blank" style="margin-top:15px; display:inline-block;">Пройти опрос</a></div>
+            <div class="filter-bar"><h3>Обсуждения</h3></div>
+            <div id="discussions-list">
+                <div class="discussion-item">
+                    <div class="discussion-title"><i class="fas fa-comment-dots"></i> Какая стратегия лучше для новичка: StarCraft II или Age of Empires IV?</div>
+                    <div class="discussion-stats">
+                        <span><i class="fas fa-eye"></i> 234 просмотра</span>
+                        <span><i class="fas fa-comment"></i> 18 комментариев</span>
+                    </div>
+                </div>
+                <div class="discussion-item">
+                    <div class="discussion-title"><i class="fas fa-comment-dots"></i> Какой мод для Civilization VI вы считаете самым полезным?</div>
+                    <div class="discussion-stats">
+                        <span><i class="fas fa-eye"></i> 156 просмотров</span>
+                        <span><i class="fas fa-comment"></i> 12 комментариев</span>
+                    </div>
+                </div>
+            </div>
+            <div class="banner-small"><h3>Голосование: лучшая стратегия 2026</h3><button class="btn btn-outline">Голосовать</button></div>
+            <div class="banner-small"><h3>Событие: Турнир 20 марта</h3></div>
+            <div id="devFormSection" class="dev-form-classic"><h3>Заявка для разработчиков</h3><input type="text" placeholder="Название студии"><input type="email" placeholder="Email"><textarea placeholder="Название игры, жанр" rows="3"></textarea><button class="btn" onclick="alert('Заявка отправлена!')">Отправить</button></div>
+        </section>
+
+        <section id="partners" class="page">
+            <h2>Для партнёров и разработчиков</h2>
+            <div style="background: linear-gradient(135deg, #1A73E8 0%, #0F1115 100%); padding:40px; border-radius:30px; margin-bottom:40px;"><h3 style="color:white;">Вы разработчик игр?</h3><p>Разместите свою игру на StrategyHub и получите доступ к тысячам игроков</p><button class="btn" id="becomePartnerBtn" style="margin-top:15px;">Стать партнёром</button></div>
+            <h3>Тарифы для разработчиков</h3>
+            <div class="pricing-grid"><div class="pricing-card"><h4>Базовый</h4><div class="price">0 BYN</div><p>Карточка в каталоге</p><p>Базовый поиск</p><button class="btn">Выбрать</button></div><div class="pricing-card"><h4>Стандарт</h4><div class="price">49 BYN/мес</div><p>Баннеры в каталоге</p><p>Аналитика просмотров</p><p>Приоритет в поиске</p><button class="btn">Выбрать</button></div><div class="pricing-card premium"><h4>Премиум</h4><div class="price">99 BYN/мес</div><p>Главная страница</p><p>Email-рассылка</p><p>Эксклюзивный баннер</p><button class="btn">Выбрать</button></div></div>
+            <h3>Для игроков</h3>
+            <div class="pricing-grid"><div class="pricing-card"><h4>Премиум-аккаунт</h4><div class="price">199 BYN/год</div><p>Ранний доступ к обзорам</p><p>Эксклюзивные гайды</p><p>Скидки от партнёров</p><button class="btn">Купить</button></div><div class="pricing-card"><h4>Платные турниры</h4><div class="price">10 BYN</div><p>Оргвзнос за турнир</p><p>Призовой фонд 1000 BYN</p><button class="btn">Участвовать</button></div></div>
+        </section>
+
+        <section id="about" class="page">
+            <h2>О StrategyHub</h2>
+            <div style="margin-bottom: 30px; font-size:1.05rem;"><p style="margin-bottom:15px;"><strong>ООО «StrategyHub»</strong> — белорусская компания, создающая цифровую экосистему для любителей стратегических онлайн-игр. Мы объединяем игроков, разработчиков и издателей в одном пространстве, предоставляя актуальную информацию, аналитику и инструменты для взаимодействия.</p><p><strong>Назначение сайта StrategyHub</strong> — стать центральной платформой для поиска стратегий, изучения гайдов, участия в турнирах и коммуникации внутри игрового сообщества. Здесь каждый найдёт любимую игру, полезные материалы и единомышленников.</p></div>
+            <div class="banner-small"><h3><i class="fas fa-calendar-alt"></i> На рынке с 2023 года</h3><p>3 года успешной работы, постоянный рост аудитории и доверие игроков.</p></div>
+            <h3>Награды и сертификаты</h3>
+            <div class="awards-grid"><div class="award-item"><i class="fas fa-trophy"></i> Лучший игровой стартап 2025 (Belarus Game Awards)</div><div class="award-item"><i class="fas fa-medal"></i> Выбор редакции StopGame.ru</div><div class="award-item"><i class="fas fa-shield-alt"></i> Сертификат безопасности персональных данных РБ</div></div>
+            <h3>StrategyHub в цифрах</h3>
+            <div class="stats-grid"><div class="stat-item"><div class="stat-number">500+</div><div>игр в каталоге</div></div><div class="stat-item"><div class="stat-number">10 000+</div><div>активных игроков</div></div><div class="stat-item"><div class="stat-number">50+</div><div>турниров проведено</div></div><div class="stat-item"><div class="stat-number">34 млн</div><div>BYN ёмкость рынка</div></div><div class="stat-item"><div class="stat-number">3 года</div><div>на рынке</div></div><div class="stat-item"><div class="stat-number">95%</div><div>игроков возвращаются</div></div><div class="stat-item"><div class="stat-number">24/7</div><div>поддержка</div></div><div class="stat-item"><div class="stat-number">15+</div><div>партнёров-разработчиков</div></div><div class="stat-item"><div class="stat-number">1200+</div><div>гайдов и обзоров</div></div><div class="stat-item"><div class="stat-number">100%</div><div>честных отзывов</div></div></div>
+            <h3>10 преимуществ StrategyHub</h3>
+            <div class="advantages-grid"><div class="advantage-card"><i class="fas fa-gamepad"></i><h4>Удобный каталог</h4><p>Мощные фильтры и поиск</p></div><div class="advantage-card"><i class="fas fa-search"></i><h4>Глубокий поиск</h4><p>По жанрам, тегам, платформам</p></div><div class="advantage-card"><i class="fas fa-users"></i><h4>Активное сообщество</h4><p>Обсуждения, турниры, голосования</p></div><div class="advantage-card"><i class="fas fa-code"></i><h4>Для разработчиков</h4><p>Размещение игр, аналитика</p></div><div class="advantage-card"><i class="fas fa-chart-line"></i><h4>Аналитика</h4><p>Рейтинги, отзывы, тренды</p></div><div class="advantage-card"><i class="fas fa-gift"></i><h4>Бонусная система</h4><p>Баллы за активность</p></div><div class="advantage-card"><i class="fas fa-mobile-alt"></i><h4>Адаптивный дизайн</h4><p>Удобство на любых устройствах</p></div><div class="advantage-card"><i class="fas fa-shield-alt"></i><h4>Безопасность данных</h4><p>Серверы в РБ</p></div><div class="advantage-card"><i class="fas fa-headset"></i><h4>Поддержка 24/7</h4><p>Ответ в Telegram за час</p></div><div class="advantage-card"><i class="fas fa-trophy"></i><h4>Эксклюзивные турниры</h4><p>Регулярные соревнования с призами</p></div></div>
+            <h3>10 фактов о StrategyHub</h3>
+            <div class="facts-grid"><div class="fact-item"><i class="fas fa-check-circle"></i> Мы сами геймеры</div><div class="fact-item"><i class="fas fa-check-circle"></i> Первый белорусский игровой хаб</div><div class="fact-item"><i class="fas fa-check-circle"></i> В команде бывшие киберспортсмены</div><div class="fact-item"><i class="fas fa-check-circle"></i> Все игры проходят модерацию</div><div class="fact-item"><i class="fas fa-check-circle"></i> Бесплатный базовый тариф навсегда</div><div class="fact-item"><i class="fas fa-check-circle"></i> Поддержка 24/7 в Telegram</div><div class="fact-item"><i class="fas fa-check-circle"></i> Серверы в Беларуси</div><div class="fact-item"><i class="fas fa-check-circle"></i> Более 500 отзывов от игроков</div><div class="fact-item"><i class="fas fa-check-circle"></i> 50+ турниров с призовыми местами</div><div class="fact-item"><i class="fas fa-check-circle"></i> Ежемесячные обновления контента</div></div>
+            <h3>Наши гарантии</h3>
+            <div class="guarantees-grid"><div class="guarantee-card"><i class="fas fa-lock"></i><h4>Безопасность данных</h4><p>Серверы в РБ, закон о персональных данных</p></div><div class="guarantee-card"><i class="fas fa-star"></i><h4>Честные рейтинги</h4><p>Только от реальных игроков</p></div><div class="guarantee-card"><i class="fas fa-shield"></i><h4>Модерация контента</h4><p>Никакого спама и фейков</p></div><div class="guarantee-card"><i class="fas fa-headset"></i><h4>Поддержка 24/7</h4><p>Ответ в Telegram в течение часа</p></div></div>
+        </section>
+
+        <section id="faq" class="page">
+            <h2>Помощь и FAQ</h2>
+            <h3>Как работать с платформой</h3>
+            <div class="steps-grid"><div class="step-item" id="stepRegister"><i class="fas fa-user-plus"></i><h4>1. Регистрация</h4><p>Создай аккаунт за 1 минуту</p></div><div class="step-item" onclick="navigateTo('catalog')"><i class="fas fa-search"></i><h4>2. Поиск игры</h4><p>Используй фильтры</p></div><div class="step-item" onclick="navigateTo('guides')"><i class="fas fa-book"></i><h4>3. Читай гайды</h4><p>Тактики и советы</p></div><div class="step-item" onclick="navigateTo('community')"><i class="fas fa-comments"></i><h4>4. Общайся</h4><p>Комментируй, участвуй</p></div><div class="step-item" onclick="navigateTo('partners')"><i class="fas fa-code"></i><h4>5. Для разработчиков</h4><p>Размести игру</p></div></div>
+            <h3>Частые вопросы</h3>
+            <div class="guide-list"><div class="guide-item"><h3>Как зарегистрироваться?</h3><p>Нажмите на иконку пользователя в правом верхнем углу и выберите «Регистрация».</p></div><div class="guide-item"><h3>Как оставить отзыв?</h3><p>Перейдите на страницу игры, прокрутите вниз до блока отзывов и нажмите «Написать отзыв».</p></div><div class="guide-item"><h3>Как получить бонусные баллы?</h3><p>Баллы начисляются за отзывы, голосования, приглашение друзей и прохождение опросов.</p></div><div class="guide-item"><h3>Как разместить игру?</h3><p>Заполните форму заявки на странице «Партнёрам» или в разделе «Сообщество».</p></div><div class="guide-item"><h3>Что даёт премиум-аккаунт?</h3><p>Ранний доступ к обзорам, эксклюзивные гайды, скидки от партнёров.</p></div></div>
+        </section>
+
+        <section id="contacts" class="page">
+            <h2>Контакты</h2>
+            <div class="my-contacts">
+                <p><i class="fas fa-user"></i> <strong>Контактное лицо:</strong>Кривальцевич Диана Владимировна</p>
+                <p><i class="fas fa-briefcase"></i> <strong>Должность:</strong>Директор компании ООО «StrategyHub»</p>
+                <p><i class="fas fa-envelope"></i> <strong>Email:</strong>dianakrivalcevich@icloud.com</p>
+                <p><i class="fas fa-phone"></i> <strong>Тел.:</strong>+375 (29) 134-45-01</p>
+                <p><i class="fas fa-headset"></i> <strong>Поддержка:</strong>support@strategyhub.by</p>
+                <div class="contact-social-icons">
+                    <a href="#"><i class="fab fa-vk"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section id="cabinet-page" class="page">
+            <h2>Личный кабинет</h2>
+            <div style="background: linear-gradient(135deg, #1A1D23 0%, #0F1115 100%); border:2px solid #1A73E8; border-radius:20px; padding:30px; margin-bottom:30px; display:flex; align-items:center; gap:20px;"><div style="width:80px; height:80px; background:#FF6B35; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.5rem;"><i class="fas fa-gamepad"></i></div><div><span style="font-size:2rem; font-weight:700; color:#1A73E8;">Екатерина Соколова</span><br><span style="color:#FF6B35;">геймер</span></div></div>
+            <div class="cabinet-grid"><div class="cabinet-card"><h3><i class="fas fa-star"></i> Избранные игры</h3><ul><li>StarCraft II</li><li>Civilization VI</li><li>Total War: Warhammer III</li></ul></div><div class="cabinet-card"><h3><i class="fas fa-bell"></i> Подписки</h3><ul><li>Новые релизы</li><li>Патчи и обновления</li><li>Новые гайды</li><li>События сообщества</li></ul></div><div class="cabinet-card"><h3><i class="fas fa-cog"></i> Настройки уведомлений</h3><ul><li>Email-рассылка</li><li>Push-уведомления</li><li>Telegram (отключено)</li></ul></div></div>
+            <div class="loyalty-card" style="margin-top:20px;"><h3>Ваши бонусы: 250 баллов</h3><p>Пригласите друга и получите +100 баллов</p><p class="bonus-info" style="margin-top:10px;">Баллы можно обменять на скидку премиум-аккаунта или участие в эксклюзивных турнирах</p></div>
+        </section>
+    </main>
+
+    <footer><div class="container"><div class="footer-grid"><div><h4>StrategyHub</h4><p>центр стратегий</p></div><div><h4>Страницы</h4><p><a href="#" data-page="catalog">Обзор стратегий</a><br><a href="#" data-page="news">Новости</a><br><a href="#" data-page="about">О нас</a><br><a href="#" data-page="faq">Помощь</a><br><a href="#" data-page="partners">Партнёрам</a></p></div><div><h4>Правовая информация</h4><p>Политика конфиденциальности<br>Пользовательское соглашение</p></div><div><h4>Мы в соцсетях</h4><div class="social-links"><a href="#"><i class="fab fa-vk"></i></a><a href="#"><i class="fab fa-telegram"></i></a><a href="#"><i class="fab fa-discord"></i></a></div></div></div><p style="text-align:center; margin-top:40px;">© 2026 StrategyHub. support@strategyhub.by</p></div></footer>
+
+    <script>
+        const games = [{"id":1,"title":"StarCraft II","genre":"RTS","platform":"ПК","online":"Онлайн","difficulty":"Хардкор","year":2020,"rating":9.2,"popularity":1500,"image":"https://upload.wikimedia.org/wikipedia/ru/0/07/StarCraft_II.jpg","screenshots":["https://blz-contentstack-images.akamaized.net/v3/assets/bltf408a0557f4e4998/blt027810824cd38a10/67fed76a4a0043f7bb8d6935/game_mode_versus.png?imwidth=1920&imdensity=2.625","https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt47620dd0ad424ebb/69644be7f4fa3f283301a323/overview_thumbnail.webp?format=webp","https://www.notebookcheck-ru.com/fileadmin/Notebooks/News/_nc5/Stormgate-Steam-launch.png"],"description":"Легендарная RTS","fullDescription":"StarCraft II — культовая стратегия в реальном времени от Blizzard Entertainment. Три уникальные расы, глубокий тактический геймплей, профессиональная киберспортивная сцена.","tags":["RTS","MMO"]},{"id":2,"title":"XCOM 2","genre":"Пошаговая","platform":"ПК","online":"Офлайн","difficulty":"Хардкор","year":2019,"rating":9.1,"popularity":1100,"image":"https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/XCOM_2_cover_art.jpg/250px-XCOM_2_cover_art.jpg","screenshots":["https://preview.redd.it/xcom-2-collection-v0-xei088oacpvb1.jpg?width=1080&crop=smart&auto=webp&s=5dc22005e3ebb7808f1dce22effad805eaf91af3","https://cdn.toucharcade.com/wp-content/uploads/2020/11/ACBBD577-384A-4B18-A5C5-36F5FA3712D5.jpeg","https://gamedata.club/uploads/posts/2016-10/1476651946_boycy-v-xcom-2.jpg"],"description":"Тактика против пришельцев","fullDescription":"XCOM 2 — пошаговая тактическая стратегия. Командуйте отрядом сопротивления в войне против инопланетных захватчиков.","tags":["Пошаговая"]},{"id":3,"title":"Total War: Warhammer III","genre":"RTS","platform":"ПК","online":"Онлайн","difficulty":"Средняя","year":2023,"rating":9.0,"popularity":1100,"image":"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1142710/capsule_616x353.jpg?t=1773332675","screenshots":["https://media.wired.com/photos/620d372110a719b317e6ace9/master/w_1600%2Cc_limit/Gear-Warhammer-III-Nurgle_Battle-SOURCE-SEGA.jpg","https://support.sega.com/hc/article_attachments/27916437596945","https://xboxwire.thesourcemediaassets.com/sites/2/2021/11/CR-Grand-Cathay_Battle_FINAL.jpg"],"description":"Грандиозные битвы","fullDescription":"Total War: Warhammer III — сочетание пошаговой стратегии и масштабных битв в реальном времени в фэнтези-вселенной Warhammer.","tags":["RTS"]},{"id":4,"title":"Civilization VI","genre":"Пошаговая","platform":"ПК","online":"Офлайн","difficulty":"Средняя","year":2022,"rating":8.9,"popularity":1200,"image":"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/289070/capsule_616x353.jpg?t=1740607040","screenshots":["https://images.ctfassets.net/wn7ipiv9ue5v/aAinQN2T3BvgHD8kdZtoi/c958c7624dd79f95c5c090b7a3b8f103/Copy_of_2KCAP_Civ-6_Great-Negotiators-Screenshots_Saladin_militaryflanking_fixed__1_.jpg","https://cdn2.unrealengine.com/five-reasons-why-civilization-6-is-so-enduringly-popular-map-1920x1080-acbd58245a1b.jpg","https://images.ctfassets.net/wn7ipiv9ue5v/8JTi8VgmfLQPbtESVbU5N/64e0aaafc6d3ffb11067ff4c1abcab1c/ss_f501156a69223131ee8b12452f3003698334e964.1920x1080.jpg"],"description":"Построй свою империю","fullDescription":"Civilization VI — глобальная пошаговая стратегия. Ведите свой народ от каменного века до информационной эры.","tags":["4X","Пошаговая"]},{"id":5,"title":"Company of Heroes 3","genre":"RTS","platform":"ПК","online":"Онлайн","difficulty":"Хардкор","year":2023,"rating":8.8,"popularity":850,"image":"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1677280/header.jpg?t=1764272700","screenshots":["https://xboxwire.thesourcemediaassets.com/sites/2/2023/09/COH3_XBOX-UI_Console-Pre-Order_NorthAfrica-2bbd44c30e666300c31f.jpg","https://m.media-amazon.com/images/I/911+dN4ZeiL.jpg","https://hot.game/uploads/media/slide_game/0002/07/754fb3b2ddf1b90374c7cb496a1fe5df59f0a276.jpeg"],"description":"Тактика Второй мировой","fullDescription":"Company of Heroes 3 — тактическая RTS о Второй мировой войне. Динамичные сражения, разрушаемое окружение, тактические возможности.","tags":["RTS"]},{"id":6,"title":"Age of Empires IV","genre":"RTS","platform":"ПК","online":"Онлайн","difficulty":"Новичок","year":2024,"rating":8.7,"popularity":900,"image":"https://i.ytimg.com/vi/nOqnYwO7_T8/maxresdefault.jpg","screenshots":["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1466860/ss_2ae5b5a2a779c31e3acae486ec359b0d9087bc8c.1920x1080.jpg?t=1762295217","https://media.wired.com/photos/6172e44f8acfc2aaa8454fbe/3:2/w_3240,h_2160,c_limit/Age%20of%20Empires%20IV_3_4K.jpg","https://i.ytimg.com/vi/BiC249vXiIo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCyR843gPRA3d9Rlqcp9Ji1NXHPJg"],"description":"Возвращение легенды","fullDescription":"Age of Empires IV — долгожданное продолжение легендарной серии RTS. Ведите свою цивилизацию через века.","tags":["RTS"]},{"id":7,"title":"Endless Legend","genre":"4X","platform":"ПК","online":"Офлайн","difficulty":"Средняя","year":2020,"rating":8.6,"popularity":750,"image":"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3407390/97111c31fc17061971264084ce53759b6476cc90/capsule_616x353.jpg?t=1773014901","screenshots":["https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmBmQ_R9uFJa_72RgZky9gABk3UmPFyUSbow&s","https://cdn.dlcompare.com/game_tetiere/upload/gameimage/file/endless-legend-file-459121ff.jpeg.webp","https://gameguru.ru/media/cache/4b/c1/4bc17a819ab3836530776388490642b4.jpg"],"description":"Фэнтези 4X","fullDescription":"Endless Legend — фэнтезийная 4X-стратегия. Уникальные фракции, глубокая магия, динамичный мир.","tags":["4X"]},{"id":8,"title":"Teamfight Tactics","genre":"MMO","platform":"Мобильные","online":"Онлайн","difficulty":"Средняя","year":2024,"rating":8.5,"popularity":950,"image":"https://cdn1.epicgames.com/offer/ada73cc2d68a46a18f529ebb87328dee/EGS_TeamfightTactics_RiotGames_S1_2560x1440-f18aa074ed363781cd27f44c1ce088e4","screenshots":["https://store-images.s-microsoft.com/image/apps.3195.13993220746278015.e30facd9-4e1e-457e-8dc9-a01b7c171540.49291556-a7d3-4eb2-bef3-bf363b2bb195","https://store-images.s-microsoft.com/image/apps.56933.13993220746278015.e30facd9-4e1e-457e-8dc9-a01b7c171540.1fa6d9dc-44d5-485d-a703-91e118699200","https://miro.medium.com/v2/resize:fit:1400/1*6DUvZ8929i_abuPr-_LHQg.png"],"description":"Автошахматы от Riot","fullDescription":"Teamfight Tactics — популярная авто-батлер игра во вселенной League of Legends от Riot Games.","tags":["MMO"]},{"id":9,"title":"Battle for Wesnoth","genre":"Пошаговая","platform":"ПК","online":"Онлайн","difficulty":"Новичок","year":2021,"rating":8.4,"popularity":650,"image":"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/599390/capsule_616x353.jpg?t=1713205573","screenshots":["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/599390/ss_634ece7cfb5ee74d354a9355649e6a0977088e69.1920x1080.jpg?t=1713205573","https://raw.githubusercontent.com/PortsMaster/PortMaster-New/main/ports/wesnoth/screenshot.png","https://images.steamusercontent.com/ugc/54714481505221623/343E96BDDC8CFE760D20B5A694C0CDC62BD45F75/"],"description":"Бесплатная пошаговая","fullDescription":"Battle for Wesnoth — бесплатная пошаговая стратегия с открытым кодом. Множество кампаний, рас и тактических возможностей.","tags":["Пошаговая"]},{"id":10,"title":"Northgard","genre":"RTS","platform":"ПК","online":"Онлайн","difficulty":"Новичок","year":2021,"rating":8.3,"popularity":700,"image":"https://upload.wikimedia.org/wikipedia/ru/b/b2/Northgard.jpg","screenshots":["https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/466560/ss_eb6ecfd37f68dc5cadabf603c4ab890d2a545730.1920x1080.jpg?t=1764864250","https://cdn.mos.cms.futurecdn.net/v2/t:0,l:240,cw:1440,ch:1080,q:80,w:1440/hjiGerwHwTpyVGzau2nEvB.jpg","https://play-lh.googleusercontent.com/TqUvUIqLDHf385djjFSu8JgoEVd-kZ9ySKwIeRBYCALakF_08uytvmu4wbV9WmQYo98=w526-h296-rw"],"description":"Викинги и стратегия","fullDescription":"Northgard — стратегия о викингах. Исследуйте новые земли, добывайте ресурсы, защищайтесь от врагов и суровых зим.","tags":["RTS"]},{"id":11,"title":"Dota Underlords","genre":"MMO","platform":"Мобильные","online":"Онлайн","difficulty":"Средняя","year":2023,"rating":8.2,"popularity":800,"image":"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1046930/capsule_616x353.jpg?t=1745368592","screenshots":["https://www.gamespot.com/a/uploads/original/172/1720905/3640686-desktop%20screenshot%202020.03.02%20-%2012.29.22.74.jpg","https://cdn.mos.cms.futurecdn.net/M3dikH4FHBk9zGEPR6QyDa.png","https://assets.rockpapershotgun.com/images/2020/03/DotaUnderlordsrev5.jpg"],"description":"Тактическая авто-батлер игра","fullDescription":"Dota Underlords — тактическая авто-батлер игра от Valve. Составляйте команду из героев, расставляйте их на поле и наблюдайте за битвой.","tags":["MMO"]},{"id":12,"title":"Iron Harvest","genre":"RTS","platform":"ПК","online":"Онлайн","difficulty":"Средняя","year":2022,"rating":8.0,"popularity":600,"image":"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/826630/header.jpg?t=1771496696","screenshots":["https://assets1.ignimgs.com/2020/09/03/ironharvest-review-blogroll-1599169182591.jpg","https://cdn.dlcompare.com/game_tetiere/upload/gameimage/file/53576.jpg.webp","https://store-images.s-microsoft.com/image/apps.44581.13788850525834158.7f6ce130-4fbf-4f16-ad75-a5c05f7e4df3.8c322303-c7d8-4137-8f0b-061edb5c0e8b?q=90&w=480&h=270"],"description":"Дизельпанк RTS","fullDescription":"Iron Harvest — стратегия в альтернативной вселенной 1920-х годов. Огромные шагоходы, эпические сражения, глубокая кампания.","tags":["RTS"]}];
+        const news = [{"id":1,"title":"Релиз дополнения для AoE IV","date":"12.03.2026","content":"Новая кампания «Викинги» уже доступна. Добавлены 3 новые цивилизации и карты. Обновление включает новый игровой режим \"Завоевание\" и балансные правки."},{"id":2,"title":"Топ стратегий марта","date":"11.03.2026","content":"Что выбирают белорусские игроки? StarCraft II лидирует, за ним следует Civilization VI и Total War. Аналитика предпочтений и тренды месяца."},{"id":3,"title":"Интервью с разработчиками","date":"10.03.2026","content":"Студия FROST обсудила баланс в Company of Heroes 3, планы на будущие обновления и работу над новым проектом."}];
+        const guides = [{"title":"StarCraft II: быстрый старт","content":"Основы макро и микро. Советы для новичков: как правильно распределять ресурсы, строить армию и вести разведку.","author":"Player1"},{"title":"Civilization VI: научная победа","content":"Как быстро развить науку и построить космический корабль. Оптимальная стратегия развития, важные технологии и чудеса света.","author":"Strateg"},{"title":"XCOM 2: тактика отряда","content":"Разбор механик укрытий, классов солдат и синергии навыков. Как минимизировать потери в сложных миссиях.","author":"Veteran"}];
+
+        function navigateTo(pageId){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(pageId).classList.add('active');document.querySelectorAll('[data-page]').forEach(l=>l.classList.remove('active'));document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});if(pageId==='catalog')renderCatalog();if(pageId==='news')renderNews();if(pageId==='guides')renderGuides();if(pageId==='ratings')renderRatings(document.getElementById('ratingType').value);if(pageId==='home')renderHome();}
+        function renderHome(){document.getElementById('popular-games').innerHTML=games.slice(0,4).map(g=>`<div class="game-card" onclick="showGame(${g.id})"><div class="game-image" style="background-image:url('${g.image}');"><span class="game-rating">${g.rating}</span></div><div class="game-info"><h4>${g.title}</h4><div class="game-meta"><i class="fas fa-tag"></i> ${g.genre}</div></div></div>`).join('');document.getElementById('home-news').innerHTML=news.map(n=>`<div class="news-item" onclick="openNews('${n.title.replace(/'/g, "\\'")}','${n.content.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><span class="news-date">${n.date}</span><h3>${n.title}</h3></div>`).join('');}
+        function renderCatalog(){const genre=document.getElementById('filterGenre').value,platform=document.getElementById('filterPlatform').value,online=document.getElementById('filterOnline').value,difficulty=document.getElementById('filterDifficulty').value,year=document.getElementById('filterYear').value,sort=document.getElementById('sortOrder').value,search=document.getElementById('searchInput')?.value.toLowerCase()||'';let filtered=games.filter(g=>(!genre||g.genre===genre)&&(!platform||g.platform===platform)&&(!online||g.online===online)&&(!difficulty||g.difficulty===difficulty)&&(!year||g.year==year)&&(!search||g.title.toLowerCase().includes(search)||g.tags.some(t=>t.toLowerCase().includes(search))));if(sort==='rating')filtered.sort((a,b)=>b.rating-a.rating);else if(sort==='popular')filtered.sort((a,b)=>b.popularity-a.popularity);else if(sort==='new')filtered.sort((a,b)=>b.year-a.year);document.getElementById('catalog-games').innerHTML=filtered.map(g=>`<div class="game-card" onclick="showGame(${g.id})"><div class="game-image" style="background-image:url('${g.image}');"><span class="game-rating">${g.rating}</span></div><div class="game-info"><h4>${g.title}</h4><div class="game-meta"><i class="fas fa-desktop"></i> ${g.platform} <i class="fas fa-tag"></i> ${g.genre}</div><p>${g.description}</p></div></div>`).join('')||'<p>Ничего не найдено</p>';}
+        function showGame(id){const g=games.find(x=>x.id===id);if(!g)return;const screenshots=g.screenshots||[];document.getElementById('game-detail-container').innerHTML=`<div class="game-detail-card"><div class="game-detail-layout"><div class="game-detail-image"><img src="${g.image}" alt="${g.title}"></div><div class="game-detail-info"><h2>${g.title}</h2><div style="background:#0F1115; padding:20px; border-radius:12px; border-left:4px solid var(--accent-orange);"><p>${g.fullDescription}</p><p><strong>Жанр:</strong> ${g.genre} | <strong>Платформа:</strong> ${g.platform} | <strong>Режим:</strong> ${g.online}</p><p><strong>Сложность:</strong> ${g.difficulty} | <strong>Год:</strong> ${g.year}</p><p><strong>Рейтинг:</strong> <span style="color:var(--accent-orange);">${g.rating}/10</span></p></div></div></div><div class="game-detail-screenshots"><h3>Скриншоты</h3><div class="screenshots-grid">${screenshots.map(url=>`<img src="${url}">`).join('')}</div></div><h3>Отзывы игроков</h3><div class="review-item"><strong><i class="fas fa-user"></i> Игрок123:</strong> Отличная игра! <span class="review-actions"><i class="fas fa-thumbs-up"></i> 12 <i class="fas fa-thumbs-down"></i> 2</span></div><div class="review-item"><strong><i class="fas fa-user"></i> Strateg2026:</strong> Лучшая стратегия года. <span class="review-actions"><i class="fas fa-thumbs-up"></i> 8 <i class="fas fa-thumbs-down"></i> 0</span></div><h3>Похожие игры</h3><div class="games-grid" style="grid-template-columns:repeat(3,1fr);">${games.filter(x=>x.id!==g.id).slice(0,3).map(x=>`<div class="game-card" onclick="showGame(${x.id})"><div class="game-info"><h4>${x.title}</h4><p>${x.genre}</p></div></div>`).join('')}</div><h3>Обновления и патчи</h3><div style="background:#0F1115; padding:15px; border-radius:8px; border-left:4px solid var(--primary-blue);"><p><strong>Патч 2.3.1 (10.03.2026):</strong> Балансные правки, исправление ошибок, улучшение производительности</p><p><strong>Обновление "Новые горизонты" (01.03.2026):</strong> Добавлены новые карты и юниты</p></div></div>`;navigateTo('game-page');}
+        function renderNews(){document.getElementById('news-list').innerHTML=news.map(n=>`<div class="news-item" onclick="openNews('${n.title.replace(/'/g, "\\'")}','${n.content.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><span class="news-date">${n.date}</span><h3>${n.title}</h3></div>`).join('');}
+        function renderGuides(){document.getElementById('guides-list').innerHTML=guides.map(g=>`<div class="guide-item"><h3>${g.title}</h3><p>${g.content}</p><small>Автор: ${g.author}</small></div>`).join('');}
+        function renderRatings(type){let filtered=[...games];if(type==='pc')filtered=filtered.filter(g=>g.platform==='ПК');else if(type==='mobile')filtered=filtered.filter(g=>g.platform==='Мобильные');else if(type==='new')filtered=filtered.sort((a,b)=>b.year-a.year).slice(0,5);else if(type==='month')filtered=filtered.sort((a,b)=>b.popularity-a.popularity).slice(0,5);filtered.sort((a,b)=>b.rating-a.rating);filtered=filtered.slice(0,5);document.getElementById('ratings-table').innerHTML='<table class="ratings-table"><thead>    <tr><th>Игра</th><th>Рейтинг</th><th>Платформа</th><th>Жанр</th></tr> </thead><tbody>'+filtered.map(g=>`<tr><td>${g.title}</td><td><span style="color:var(--accent-orange);">${g.rating}</span></td><td>${g.platform}</td><td>${g.genre}</td></tr>`).join('')+'</tbody></table>';}
+        function openNews(title,content){document.getElementById('newsModalContent').innerHTML=`<span class="close-modal" onclick="document.getElementById('newsModal').classList.remove('active')">&times;</span><h3>${title}</h3><p>${content}</p>`;document.getElementById('newsModal').classList.add('active');}
+        function acceptCookies(){document.getElementById('cookieNotice').style.display='none';localStorage.setItem('cookiesAccepted','true');}
+        function declineCookies(){document.getElementById('cookieNotice').style.display='none';localStorage.setItem('cookiesAccepted','false');}
+        document.addEventListener('DOMContentLoaded',()=>{if(localStorage.getItem('cookiesAccepted'))document.getElementById('cookieNotice').style.display='none';document.querySelectorAll('[data-page]').forEach(l=>l.addEventListener('click',e=>{e.preventDefault();navigateTo(l.getAttribute('data-page'));}));document.getElementById('loginBtn').onclick=()=>document.getElementById('loginModal').classList.add('active');document.getElementById('registerBtn').onclick=()=>document.getElementById('registerModal').classList.add('active');document.getElementById('cabinetBtn').onclick=()=>navigateTo('cabinet-page');document.getElementById('closeLogin').onclick=()=>document.getElementById('loginModal').classList.remove('active');document.getElementById('closeRegister').onclick=()=>document.getElementById('registerModal').classList.remove('active');document.getElementById('closeNewsModal').onclick=()=>document.getElementById('newsModal').classList.remove('active');document.getElementById('stepRegister').onclick=()=>document.getElementById('registerModal').classList.add('active');document.getElementById('becomePartnerBtn').onclick=()=>{navigateTo('community');setTimeout(()=>{document.getElementById('devFormSection').scrollIntoView({behavior:'smooth'});},100);};window.onclick=e=>{if(e.target===document.getElementById('loginModal'))document.getElementById('loginModal').classList.remove('active');if(e.target===document.getElementById('registerModal'))document.getElementById('registerModal').classList.remove('active');if(e.target===document.getElementById('newsModal'))document.getElementById('newsModal').classList.remove('active');};document.getElementById('filterGenre')?.addEventListener('change',renderCatalog);document.getElementById('filterPlatform')?.addEventListener('change',renderCatalog);document.getElementById('filterOnline')?.addEventListener('change',renderCatalog);document.getElementById('filterDifficulty')?.addEventListener('change',renderCatalog);document.getElementById('filterYear')?.addEventListener('change',renderCatalog);document.getElementById('sortOrder')?.addEventListener('change',renderCatalog);document.getElementById('searchInput')?.addEventListener('input',function(){let val=this.value.toLowerCase();let items=games.filter(g=>g.title.toLowerCase().includes(val)||g.tags.some(t=>t.toLowerCase().includes(val))).slice(0,5);document.getElementById('autocomplete').innerHTML=items.map(g=>`<div onclick="document.getElementById('searchInput').value='${g.title}'; renderCatalog(); document.getElementById('autocomplete').innerHTML=''">${g.title} (${g.genre})</div>`).join('');renderCatalog();});document.addEventListener('click',e=>{if(!e.target.closest('.search-container'))document.getElementById('autocomplete').innerHTML='';});document.getElementById('ratingType')?.addEventListener('change',e=>renderRatings(e.target.value));navigateTo('home');});
+        window.navigateTo=navigateTo;window.showGame=showGame;window.openNews=openNews;window.acceptCookies=acceptCookies;window.declineCookies=declineCookies;
+    </script>
+</body>
+</html>
